@@ -7,7 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable'
 import { ArrowLeft, BookOpen, FileText, Edit } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import remarkMath from 'remark-math'
+import rehypeHighlight from 'rehype-highlight'
+import rehypeKatex from 'rehype-katex'
+import rehypeRaw from 'rehype-raw'
 import Link from 'next/link'
+import 'highlight.js/styles/github.css'
+import 'katex/dist/katex.min.css'
 
 interface Section {
   id: string
@@ -32,6 +39,12 @@ export default function ViewProjectPage() {
   useEffect(() => {
     fetchProject()
   }, [params.id])
+
+  useEffect(() => {
+    if (selectedSection?.content && process.env.NODE_ENV === 'development') {
+      console.log('Selected section content:', selectedSection.content);
+    }
+  }, [selectedSection]);
 
   const fetchProject = async () => {
     try {
@@ -75,7 +88,7 @@ export default function ViewProjectPage() {
             <Link href="/preview">
               <Button variant="ghost" size="sm">
                 <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Preview
+                Back
               </Button>
             </Link>
             <div>
@@ -138,11 +151,6 @@ export default function ViewProjectPage() {
                             </span>
                             <div>
                               <h3 className="font-medium text-sm">{section.title}</h3>
-                              {section.content && (
-                                <p className="text-xs opacity-75 mt-1 line-clamp-2">
-                                  {section.content.replace(/[#*`]/g, '').substring(0, 100)}...
-                                </p>
-                              )}
                             </div>
                           </div>
                         </div>
@@ -167,39 +175,104 @@ export default function ViewProjectPage() {
                   <CardContent className="h-[calc(100vh-350px)] overflow-y-auto p-6">
                     {selectedSection ? (
                       selectedSection.content ? (
-                        <div className="prose prose-sm max-w-none">
+                        <div className="prose prose-lg max-w-none dark:prose-invert">
                           <ReactMarkdown
+                            remarkPlugins={[remarkGfm, remarkMath]}
+                            rehypePlugins={[rehypeHighlight, rehypeKatex, rehypeRaw]}
                             components={{
                               h1: ({ children }) => (
-                                <h1 className="text-2xl font-bold mb-4 mt-6 first:mt-0">{children}</h1>
+                                <h1 className="text-3xl font-bold mb-6 mt-8 first:mt-0 text-gray-900 dark:text-gray-100 border-b border-gray-200 dark:border-gray-700 pb-2">{children}</h1>
                               ),
                               h2: ({ children }) => (
-                                <h2 className="text-xl font-semibold mb-3 mt-5 first:mt-0">{children}</h2>
+                                <h2 className="text-2xl font-semibold mb-4 mt-6 first:mt-0 text-gray-800 dark:text-gray-200">{children}</h2>
                               ),
                               h3: ({ children }) => (
-                                <h3 className="text-lg font-medium mb-2 mt-4 first:mt-0">{children}</h3>
+                                <h3 className="text-xl font-medium mb-3 mt-5 first:mt-0 text-gray-700 dark:text-gray-300">{children}</h3>
+                              ),
+                              h4: ({ children }) => (
+                                <h4 className="text-lg font-medium mb-2 mt-4 first:mt-0 text-gray-700 dark:text-gray-300">{children}</h4>
+                              ),
+                              h5: ({ children }) => (
+                                <h5 className="text-base font-medium mb-2 mt-3 first:mt-0 text-gray-700 dark:text-gray-300">{children}</h5>
+                              ),
+                              h6: ({ children }) => (
+                                <h6 className="text-sm font-medium mb-2 mt-3 first:mt-0 text-gray-700 dark:text-gray-300">{children}</h6>
                               ),
                               p: ({ children }) => (
-                                <p className="mb-4 leading-relaxed">{children}</p>
+                                <p className="mb-4 leading-relaxed text-gray-600 dark:text-gray-400 text-base">{children}</p>
                               ),
                               ul: ({ children }) => (
-                                <ul className="mb-4 ml-6 space-y-1 list-disc">{children}</ul>
+                                <ul className="mb-6 ml-6 space-y-2 list-disc marker:text-blue-500">{children}</ul>
                               ),
                               ol: ({ children }) => (
-                                <ol className="mb-4 ml-6 space-y-1 list-decimal">{children}</ol>
+                                <ol className="mb-6 ml-6 space-y-2 list-decimal marker:text-blue-500">{children}</ol>
                               ),
                               li: ({ children }) => (
-                                <li className="pl-1">{children}</li>
+                                <li className="pl-2 text-gray-600 dark:text-gray-400">{children}</li>
                               ),
-                              code: ({ children }) => (
-                                <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono">{children}</code>
-                              ),
+                              code: ({ children, className }) => {
+                                const isInline = !className;
+                                return isInline ? (
+                                  <code className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-200 px-2 py-1 rounded text-sm font-mono border">{children}</code>
+                                ) : (
+                                  <code className={className}>{children}</code>
+                                );
+                              },
                               pre: ({ children }) => (
-                                <pre className="bg-muted p-3 rounded-lg overflow-x-auto mb-4">{children}</pre>
+                                <pre className="bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 p-4 rounded-lg overflow-x-auto mb-6 text-sm">{children}</pre>
                               ),
                               blockquote: ({ children }) => (
-                                <blockquote className="border-l-4 border-primary pl-4 italic my-4 text-muted-foreground">{children}</blockquote>
-                              )
+                                <blockquote className="border-l-4 border-blue-500 bg-blue-50 dark:bg-blue-950 pl-6 pr-4 py-3 italic my-6 text-gray-700 dark:text-gray-300 rounded-r-lg">{children}</blockquote>
+                              ),
+                              strong: ({ children }) => (
+                                <strong className="font-semibold text-gray-900 dark:text-gray-100">{children}</strong>
+                              ),
+                              em: ({ children }) => (
+                                <em className="italic text-gray-700 dark:text-gray-300">{children}</em>
+                              ),
+                              table: ({ children }) => (
+                                <div className="overflow-x-auto my-6">
+                                  <table className="min-w-full border border-gray-200 dark:border-gray-700 rounded-lg">{children}</table>
+                                </div>
+                              ),
+                              thead: ({ children }) => (
+                                <thead className="bg-gray-50 dark:bg-gray-800">{children}</thead>
+                              ),
+                              tbody: ({ children }) => (
+                                <tbody className="divide-y divide-gray-200 dark:divide-gray-700">{children}</tbody>
+                              ),
+                              tr: ({ children }) => (
+                                <tr className="hover:bg-gray-50 dark:hover:bg-gray-800">{children}</tr>
+                              ),
+                              th: ({ children }) => (
+                                <th className="px-4 py-3 text-left text-sm font-medium text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">{children}</th>
+                              ),
+                              td: ({ children }) => (
+                                <td className="px-4 py-3 text-sm text-gray-600 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">{children}</td>
+                              ),
+                              a: ({ children, href }) => (
+                                <a href={href} className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300 underline decoration-blue-300 hover:decoration-blue-500 transition-colors">{children}</a>
+                              ),
+                              hr: () => (
+                                <hr className="my-8 border-gray-200 dark:border-gray-700" />
+                              ),
+                              // Support for GitHub Flavored Markdown
+                              del: ({ children }) => (
+                                <del className="line-through text-gray-500 dark:text-gray-400">{children}</del>
+                              ),
+                              input: ({ checked, type }) => {
+                                if (type === 'checkbox') {
+                                  return (
+                                    <input 
+                                      type="checkbox" 
+                                      checked={checked} 
+                                      readOnly 
+                                      className="mr-2 accent-blue-500" 
+                                    />
+                                  );
+                                }
+                                return <input type={type} />;
+                              }
                             }}
                           >
                             {selectedSection.content}

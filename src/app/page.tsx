@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
-import { Calendar } from '@/components/ui/learning-calendar'
-import { LearningChart } from '@/components/ui/learning-chart'
 import { 
   Plus, 
   BookOpen, 
@@ -15,8 +13,6 @@ import {
   Clock, 
   Target,
   TrendingUp,
-  Calendar as CalendarIcon,
-  Award,
   Activity,
   User,
   Bell
@@ -160,113 +156,11 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="flex gap-6 p-6">
+      <div className="p-6">
         {/* Main Content */}
-        <div className="flex-1 space-y-6">
-          {/* Top Stats Row */}
-          {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {/* Welcome Card */}
-              <Card className="col-span-full lg:col-span-2 bg-gradient-to-r from-teal-500 to-teal-600 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-lg font-semibold mb-2">Total Learning Progress</h3>
-                      <div className="flex items-center gap-4">
-                        <div className="text-3xl font-bold">{stats.totalHours}</div>
-                        <div className="text-sm text-teal-100">hours logged</div>
-                      </div>
-                    </div>
-                    <div className="bg-white/20 p-3 rounded-lg">
-                      <BookOpen className="h-8 w-8" />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+        <div className="space-y-6">
 
-              {/* Visitors Card */}
-              <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
-                <CardContent className="p-6">
-                  <div className="text-center">
-                    <div className="text-sm text-blue-200 mb-1">Active Projects</div>
-                    <div className="text-4xl font-bold">{stats.activeProjects}</div>
-                    <div className="flex items-center justify-center gap-1 text-xs text-blue-200 mt-2">
-                      <TrendingUp className="h-3 w-3" />
-                      <span>+{stats.avgProgress}% progress</span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
 
-          {/* Charts and Analytics */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Total Projects Chart */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg">Learning Statistics</CardTitle>
-                <div className="flex items-center justify-between">
-                  <span className="text-2xl font-bold">{stats?.totalProjects || 0}</span>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-500">2024</div>
-                    <div className="text-sm text-gray-500">Year</div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {/* Simple chart representation */}
-                <div className="h-32 flex items-end justify-center">
-                  <div className="w-full h-full bg-gradient-to-t from-blue-100 to-blue-50 rounded-lg flex items-center justify-center">
-                    <div className="text-center">
-                      <div className="text-3xl font-bold text-blue-600 mb-2">{stats?.avgProgress || 0}%</div>
-                      <div className="text-sm text-gray-600">Average Progress</div>
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Learning Chart Component */}
-            <div className="lg:col-span-1">
-              <LearningChart />
-            </div>
-          </div>
-
-          {/* Bottom Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <Card className="bg-gradient-to-r from-blue-500 to-blue-600 text-white border-0">
-              <CardContent className="p-4 text-center">
-                <User className="h-8 w-8 mx-auto mb-2 text-blue-200" />
-                <div className="text-2xl font-bold">{stats?.activeProjects || 0}</div>
-                <div className="text-xs text-blue-200">New Projects</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
-              <CardContent className="p-4 text-center">
-                <Activity className="h-8 w-8 mx-auto mb-2 text-blue-200" />
-                <div className="text-2xl font-bold">{stats?.completedProjects || 0}</div>
-                <div className="text-xs text-blue-200">Operations</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-green-500 to-green-600 text-white border-0">
-              <CardContent className="p-4 text-center">
-                <BookOpen className="h-8 w-8 mx-auto mb-2 text-green-200" />
-                <div className="text-2xl font-bold">{projects.reduce((sum, p) => sum + (p._count?.sections || 0), 0)}</div>
-                <div className="text-xs text-green-200">Sections</div>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-gradient-to-r from-blue-600 to-blue-700 text-white border-0">
-              <CardContent className="p-4 text-center">
-                <Award className="h-8 w-8 mx-auto mb-2 text-blue-200" />
-                <div className="text-2xl font-bold">${stats?.totalHours ? (stats.totalHours * 25).toLocaleString() : '0'}</div>
-                <div className="text-xs text-blue-200">Earning Value</div>
-              </CardContent>
-            </Card>
-          </div>
 
           {/* Projects Section */}
           {projects.length === 0 ? (
@@ -366,11 +260,6 @@ export default function Dashboard() {
               </div>
             </div>
           )}
-        </div>
-
-        {/* Right Sidebar */}
-        <div className="w-80 flex-shrink-0">
-          <Calendar />
         </div>
       </div>
     </div>

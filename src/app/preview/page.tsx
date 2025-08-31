@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { BookOpen, Eye } from 'lucide-react'
+import { BookOpen, Eye, Edit, Trash2 } from 'lucide-react'
 import Link from 'next/link'
 
 interface LearningProject {
@@ -35,6 +35,27 @@ export default function PreviewPage() {
       console.error('Failed to fetch projects:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDelete = async (projectId: string, projectTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${projectTitle}"? This action cannot be undone.`)) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/learning-projects/${projectId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        setProjects(projects.filter(project => project.id !== projectId))
+      } else {
+        alert('Failed to delete project. Please try again.')
+      }
+    } catch (error) {
+      console.error('Failed to delete project:', error)
+      alert('Failed to delete project. Please try again.')
     }
   }
 
@@ -92,12 +113,28 @@ export default function PreviewPage() {
                       {new Date(project.createdAt).toLocaleDateString()}
                     </span>
                   </div>
-                  <Link href={`/projects/${project.id}/view`}>
-                    <Button className="w-full" size="sm">
-                      <Eye className="mr-2 h-4 w-4" />
-                      View Project
+                  
+                  {/* Action Buttons */}
+                  <div className="flex space-x-2">
+                    <Link href={`/projects/${project.id}/view`} className="flex-1">
+                      <Button className="w-full" size="sm">
+                        <Eye className="mr-2 h-4 w-4" />
+                        View
+                      </Button>
+                    </Link>
+                    <Link href={`/projects/${project.id}/edit`}>
+                      <Button variant="outline" size="sm">
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </Link>
+                    <Button 
+                      variant="destructive" 
+                      size="sm"
+                      onClick={() => handleDelete(project.id, project.title)}
+                    >
+                      <Trash2 className="h-4 w-4" />
                     </Button>
-                  </Link>
+                  </div>
                 </div>
               </CardContent>
             </Card>

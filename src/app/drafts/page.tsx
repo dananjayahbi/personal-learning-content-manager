@@ -55,7 +55,11 @@ export default function DraftsPage() {
     }
   }
 
-  const handlePublish = async (projectId: string) => {
+  const handlePublish = async (projectId: string, projectTitle: string) => {
+    if (!confirm(`Are you sure you want to publish "${projectTitle}"? It will be moved from drafts to published projects.`)) {
+      return
+    }
+
     try {
       const response = await fetch(`/api/learning-projects/${projectId}`, {
         method: 'PUT',
@@ -68,14 +72,18 @@ export default function DraftsPage() {
       if (response.ok) {
         // Remove from drafts list
         setDrafts(drafts.filter(draft => draft.id !== projectId))
+        alert(`"${projectTitle}" has been published successfully!`)
+      } else {
+        alert('Failed to publish project. Please try again.')
       }
     } catch (error) {
       console.error('Failed to publish project:', error)
+      alert('Failed to publish project. Please try again.')
     }
   }
 
-  const handleDelete = async (projectId: string) => {
-    if (!confirm('Are you sure you want to delete this draft? This action cannot be undone.')) {
+  const handleDelete = async (projectId: string, projectTitle: string) => {
+    if (!confirm(`Are you sure you want to delete "${projectTitle}"? This action cannot be undone.`)) {
       return
     }
 
@@ -86,9 +94,12 @@ export default function DraftsPage() {
 
       if (response.ok) {
         setDrafts(drafts.filter(draft => draft.id !== projectId))
+      } else {
+        alert('Failed to delete draft. Please try again.')
       }
     } catch (error) {
       console.error('Failed to delete project:', error)
+      alert('Failed to delete draft. Please try again.')
     }
   }
 
@@ -210,7 +221,7 @@ export default function DraftsPage() {
                       </div>
                       <div className="flex space-x-1">
                         <Button
-                          onClick={() => handlePublish(draft.id)}
+                          onClick={() => handlePublish(draft.id, draft.title)}
                           size="sm"
                           className="bg-green-600 hover:bg-green-700"
                         >
@@ -218,7 +229,7 @@ export default function DraftsPage() {
                           Publish
                         </Button>
                         <Button
-                          onClick={() => handleDelete(draft.id)}
+                          onClick={() => handleDelete(draft.id, draft.title)}
                           variant="destructive"
                           size="sm"
                         >

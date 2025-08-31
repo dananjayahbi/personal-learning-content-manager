@@ -85,7 +85,7 @@ export function MarkdownEditor({
           }),
           frontmatterPlugin(),
           directivesPlugin(),
-          diffSourcePlugin({ viewMode: 'rich-text', diffMarkdown: '' }),
+          diffSourcePlugin({ viewMode: 'source', diffMarkdown: '' }),
           toolbarPlugin({
             toolbarContents: () => (
               <div className="flex items-center gap-2 p-2 border-b bg-gray-50">
