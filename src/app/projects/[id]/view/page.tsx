@@ -164,7 +164,7 @@ export default function ViewProjectPage() {
                       {selectedSection ? selectedSection.title : 'Select a section'}
                     </CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="h-[calc(100vh-350px)] overflow-y-auto p-6">
                     {selectedSection ? (
                       selectedSection.content ? (
                         <div className="prose prose-sm max-w-none">

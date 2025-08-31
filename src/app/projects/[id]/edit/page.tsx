@@ -9,8 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label'
 import { ResizablePanel, ResizablePanelGroup, ResizableHandle } from '@/components/ui/resizable'
 import { ArrowLeft, Plus, Save, Trash2, Edit } from 'lucide-react'
-import { MDXEditor } from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
+import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import Link from 'next/link'
 
 interface Section {
@@ -89,17 +88,18 @@ export default function EditProjectPage() {
     }
   }
 
-  const handleUpdateSection = async () => {
-    if (!editingSection || !project) return
+  const handleUpdateSection = async (sectionToUpdate?: Section) => {
+    const sectionData = sectionToUpdate || editingSection
+    if (!sectionData || !project) return
 
     setSaving(true)
     try {
-      const response = await fetch(`/api/sections/${editingSection.id}`, {
+      const response = await fetch(`/api/sections/${sectionData.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(editingSection)
+        body: JSON.stringify(sectionData)
       })
 
       if (response.ok) {
@@ -110,13 +110,25 @@ export default function EditProjectPage() {
             s.id === updatedSection.id ? updatedSection : s
           )
         })
-        setSelectedSection(updatedSection)
+        if (editingSection?.id === updatedSection.id) {
+          setSelectedSection(updatedSection)
+        }
       }
     } catch (error) {
       console.error('Failed to update section:', error)
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleSectionSwitch = async (newSection: Section) => {
+    // Auto-save current section before switching
+    if (editingSection && editingSection.id !== newSection.id) {
+      await handleUpdateSection(editingSection)
+    }
+    
+    setSelectedSection(newSection)
+    setEditingSection(newSection)
   }
 
   const handleDeleteSection = async (sectionId: string) => {
@@ -146,22 +158,27 @@ export default function EditProjectPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
       </div>
     )
   }
 
   if (!project) {
     return (
-      <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-        <div>Project not found</div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
+          <div className="text-lg text-gray-600">Project not found</div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <div className="p-6">
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex items-center justify-between">
@@ -215,7 +232,7 @@ export default function EditProjectPage() {
                   </div>
 
                   {/* Sections List */}
-                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                  <div className="space-y-2 h-[calc(100vh-450px)] overflow-y-auto">
                     {project.sections.map((section) => (
                       <div
                         key={section.id}
@@ -224,10 +241,7 @@ export default function EditProjectPage() {
                             ? 'bg-primary text-primary-foreground'
                             : 'hover:bg-muted'
                         }`}
-                        onClick={() => {
-                          setSelectedSection(section)
-                          setEditingSection(section)
-                        }}
+                        onClick={() => handleSectionSwitch(section)}
                       >
                         <div className="flex items-center justify-between">
                           <span className="font-medium truncate">{section.title}</span>
@@ -269,7 +283,7 @@ export default function EditProjectPage() {
                       {editingSection ? `Editing: ${editingSection.title}` : 'Select a section to edit'}
                     </span>
                     <Button
-                      onClick={handleUpdateSection}
+                      onClick={() => handleUpdateSection()}
                       disabled={!editingSection || saving}
                       size="sm"
                     >
@@ -295,14 +309,17 @@ export default function EditProjectPage() {
                       </div>
                       <div>
                         <Label>Content</Label>
-                        <div className="mt-1 border rounded-md overflow-hidden">
-                          <MDXEditor
-                            markdown={editingSection.content || ''}
+                        <div className="mt-1 h-[400px]">
+                          <MarkdownEditor
+                            key={editingSection.id} // Force re-render when section changes
+                            value={editingSection.content || ''}
                             onChange={(value) => setEditingSection({
                               ...editingSection,
                               content: value
                             })}
                             height={400}
+                            placeholder="Start writing your section content..."
+                            className="h-full"
                           />
                         </div>
                       </div>
@@ -318,6 +335,7 @@ export default function EditProjectPage() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
+    </div>
     </div>
   )
 }

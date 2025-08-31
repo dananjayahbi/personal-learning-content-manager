@@ -3,11 +3,12 @@ import { db } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const project = await db.learningProject.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         sections: {
           orderBy: {
@@ -30,17 +31,20 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { title, description } = await request.json()
+    const { id } = await params
+    const { title, description, publishStatus } = await request.json()
+
+    const updateData: any = {}
+    if (title !== undefined) updateData.title = title
+    if (description !== undefined) updateData.description = description || null
+    if (publishStatus !== undefined) updateData.publishStatus = publishStatus
 
     const project = await db.learningProject.update({
-      where: { id: params.id },
-      data: {
-        title,
-        description: description || null
-      },
+      where: { id },
+      data: updateData,
       include: {
         sections: {
           orderBy: {
@@ -59,11 +63,12 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     await db.learningProject.delete({
-      where: { id: params.id }
+      where: { id }
     })
 
     return NextResponse.json({ success: true })

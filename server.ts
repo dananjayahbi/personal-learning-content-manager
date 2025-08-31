@@ -3,7 +3,7 @@ import next from 'next';
 import { createServer } from 'http';
 
 const dev = process.env.NODE_ENV !== 'production';
-const currentPort = 3000;
+const currentPort = 3367;
 const hostname = '0.0.0.0';
 
 // Create Next.js server

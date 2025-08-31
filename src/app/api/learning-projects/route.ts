@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url)
+    const publishStatus = searchParams.get('publishStatus')
+    
+    const whereClause = publishStatus ? { publishStatus } : { publishStatus: 'published' }
+    
     const projects = await db.learningProject.findMany({
+      where: whereClause,
       include: {
         _count: {
           select: {
@@ -25,7 +31,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const { title, description } = await request.json()
+    const { title, description, publishStatus } = await request.json()
 
     if (!title) {
       return NextResponse.json({ error: 'Title is required' }, { status: 400 })
@@ -34,7 +40,8 @@ export async function POST(request: NextRequest) {
     const project = await db.learningProject.create({
       data: {
         title,
-        description: description || null
+        description: description || null,
+        publishStatus: publishStatus || 'draft' // Default to draft
       },
       include: {
         _count: {

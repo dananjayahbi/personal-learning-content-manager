@@ -3,11 +3,12 @@ import { db } from '@/lib/db'
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const sections = await db.section.findMany({
-      where: { projectId: params.id },
+      where: { projectId: id },
       orderBy: {
         order: 'asc'
       }
@@ -22,9 +23,10 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params
     const { title, content } = await request.json()
 
     if (!title) {
@@ -33,7 +35,7 @@ export async function POST(
 
     // Get the current highest order for this project
     const lastSection = await db.section.findFirst({
-      where: { projectId: params.id },
+      where: { projectId: id },
       orderBy: { order: 'desc' }
     })
 
@@ -44,7 +46,7 @@ export async function POST(
         title,
         content: content || null,
         order: newOrder,
-        projectId: params.id
+        projectId: id
       }
     })
 
