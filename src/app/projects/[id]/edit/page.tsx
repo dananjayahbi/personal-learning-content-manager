@@ -158,62 +158,51 @@ export default function EditProjectPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
       </div>
     )
   }
 
   if (!project) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-        <div className="flex items-center justify-center min-h-[calc(100vh-200px)]">
-          <div className="text-lg text-gray-600">Project not found</div>
-        </div>
+      <div className="flex items-center justify-center h-screen">
+        <div className="text-lg text-gray-600">Project not found</div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <div className="p-6">
-      {/* Page Header */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <Link href="/">
-              <Button variant="ghost" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Dashboard
-              </Button>
-            </Link>
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight">Edit Project</h1>
-              <p className="text-muted-foreground">{project.title}</p>
-            </div>
-          </div>
-          <Link href={`/projects/${project.id}/view`}>
-            <Button variant="outline">
-              Preview
-            </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="h-[calc(100vh-200px)]">
+    <div className="h-screen">
+      {/* Main Content - Full Height */}
+      <div className="h-full">
         <ResizablePanelGroup direction="horizontal" className="h-full">
-          {/* Left Panel - Sections Outline */}
+          {/* Left Panel - Project Outline */}
           <ResizablePanel defaultSize={30} minSize={20}>
-            <div className="pr-4">
+            <div className="pr-4 h-full">
               <Card className="h-full">
-                <CardHeader>
+                <CardHeader className="pb-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <Link href="/">
+                      <Button variant="ghost" size="sm">
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back
+                      </Button>
+                    </Link>
+                    <Link href={`/projects/${project.id}/view`}>
+                      <Button variant="outline" size="sm">
+                        Preview
+                      </Button>
+                    </Link>
+                  </div>
+                  <div className="mb-4">
+                    <h1 className="text-2xl font-bold tracking-tight">Edit Project</h1>
+                    <p className="text-muted-foreground text-sm mt-1">{project.title}</p>
+                  </div>
                   <CardTitle className="text-lg">Project Outline</CardTitle>
-                  <CardDescription>Manage your learning sections</CardDescription>
+                  <CardDescription className="text-sm">Manage your learning sections</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="h-[calc(100%-240px)] overflow-y-auto space-y-4">
                   {/* Add New Section */}
                   <div className="flex space-x-2">
                     <Input
@@ -232,19 +221,28 @@ export default function EditProjectPage() {
                   </div>
 
                   {/* Sections List */}
-                  <div className="space-y-2 h-[calc(100vh-450px)] overflow-y-auto">
-                    {project.sections.map((section) => (
+                  <div className="space-y-2">
+                    {project.sections.map((section, index) => (
                       <div
                         key={section.id}
-                        className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                        className={`p-3 rounded-lg cursor-pointer transition-colors ${
                           selectedSection?.id === section.id
-                            ? 'bg-primary text-primary-foreground'
-                            : 'hover:bg-muted'
+                            ? 'bg-blue-50 border-2 border-blue-200 text-blue-700'
+                            : 'bg-gray-50 hover:bg-gray-100 border border-gray-200'
                         }`}
                         onClick={() => handleSectionSwitch(section)}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-medium truncate">{section.title}</span>
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium ${
+                              selectedSection?.id === section.id
+                                ? 'bg-blue-500 text-white'
+                                : 'bg-gray-400 text-white'
+                            }`}>
+                              {index + 1}
+                            </div>
+                            <span className="font-medium text-sm truncate">{section.title}</span>
+                          </div>
                           <div className="flex space-x-1">
                             <Button
                               variant="ghost"
@@ -275,7 +273,7 @@ export default function EditProjectPage() {
 
           {/* Right Panel - Markdown Editor */}
           <ResizablePanel defaultSize={70}>
-            <div className="pl-4">
+            <div className="pl-4 h-full">
               <Card className="h-full">
                 <CardHeader>
                   <CardTitle className="text-lg flex items-center justify-between">
@@ -292,9 +290,9 @@ export default function EditProjectPage() {
                     </Button>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="h-[calc(100%-80px)]">
                   {editingSection ? (
-                    <div className="space-y-4">
+                    <div className="space-y-4 h-full">
                       <div>
                         <Label htmlFor="section-title">Section Title</Label>
                         <Input
@@ -307,9 +305,9 @@ export default function EditProjectPage() {
                           className="mt-1"
                         />
                       </div>
-                      <div>
+                      <div className="flex-1">
                         <Label>Content</Label>
-                        <div className="mt-1 h-[400px]">
+                        <div className="mt-1 h-[calc(100%-60px)]">
                           <MarkdownEditor
                             key={editingSection.id} // Force re-render when section changes
                             value={editingSection.content || ''}
@@ -325,7 +323,7 @@ export default function EditProjectPage() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center h-64 text-muted-foreground">
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
                       <p>Select a section from the outline to start editing</p>
                     </div>
                   )}
@@ -335,7 +333,6 @@ export default function EditProjectPage() {
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
-    </div>
     </div>
   )
 }
