@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { ArrowLeft, Save } from 'lucide-react'
+import { ArrowLeft, Save, ArrowRight } from 'lucide-react'
 import Link from 'next/link'
 
 export default function NewProjectPage() {
@@ -18,7 +18,7 @@ export default function NewProjectPage() {
   })
   const [loading, setLoading] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent, publishStatus: 'draft' | 'published' = 'draft') => {
     e.preventDefault()
     setLoading(true)
 
@@ -28,12 +28,16 @@ export default function NewProjectPage() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify(formData)
+        body: JSON.stringify({ ...formData, publishStatus })
       })
 
       if (response.ok) {
         const project = await response.json()
-        router.push(`/projects/${project.id}/edit`)
+        if (publishStatus === 'draft') {
+          router.push(`/projects/${project.id}/edit`)
+        } else {
+          router.push('/')
+        }
       } else {
         console.error('Failed to create project')
       }
@@ -45,7 +49,8 @@ export default function NewProjectPage() {
   }
 
   return (
-    <div className="p-6">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <div className="p-6">
       {/* Page Header */}
       <div className="mb-8">
         <div className="flex items-center space-x-4 mb-4">
@@ -100,15 +105,30 @@ export default function NewProjectPage() {
                     Cancel
                   </Button>
                 </Link>
-                <Button type="submit" disabled={loading || !formData.title.trim()}>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  onClick={(e) => handleSubmit(e, 'draft')}
+                  disabled={loading || !formData.title.trim()}
+                >
                   <Save className="mr-2 h-4 w-4" />
-                  {loading ? 'Creating...' : 'Create Project'}
+                  {loading ? 'Saving...' : 'Save as Draft'}
+                </Button>
+                <Button 
+                  type="submit" 
+                  onClick={(e) => handleSubmit(e, 'published')}
+                  disabled={loading || !formData.title.trim()}
+                  className="bg-green-600 hover:bg-green-700"
+                >
+                  <ArrowRight className="mr-2 h-4 w-4" />
+                  {loading ? 'Publishing...' : 'Create & Publish'}
                 </Button>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
+    </div>
     </div>
   )
 }
